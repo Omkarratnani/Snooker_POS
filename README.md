@@ -1,4 +1,4 @@
-# Snooker & Pool Club POS System
+# Qvera POS System
 
 A modern, fast, and fully offline Point of Sale (POS) system specifically designed for Snooker, Pool, and Billiards clubs. This application provides real-time table time tracking, cafe inventory management, advanced billing (including split bills and discounts), and comprehensive sales reporting. It is packaged as a standalone desktop application.
 
