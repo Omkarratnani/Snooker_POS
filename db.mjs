@@ -19,7 +19,9 @@ export async function initDb(dbPath, oldDbJsonPath) {
       address TEXT,
       gstPercent REAL,
       currency TEXT,
-      rates TEXT
+      rates TEXT,
+      adminUsername TEXT DEFAULT 'admin',
+      adminPassword TEXT DEFAULT 'admin'
     );
 
     CREATE TABLE IF NOT EXISTS tables (
@@ -63,6 +65,10 @@ export async function initDb(dbPath, oldDbJsonPath) {
     );
   `);
 
+  // Migration for existing tables to add columns
+  try { await db.exec(`ALTER TABLE business ADD COLUMN adminUsername TEXT DEFAULT 'admin'`); } catch(e) {}
+  try { await db.exec(`ALTER TABLE business ADD COLUMN adminPassword TEXT DEFAULT 'admin'`); } catch(e) {}
+
   // Check if we need to migrate old db.json
   const row = await db.get('SELECT COUNT(*) as count FROM business');
   if (row.count === 0) {
@@ -87,8 +93,8 @@ async function migrateData(state) {
 
   if (business) {
     await db.run(
-      `INSERT INTO business (id, name, phone, address, gstPercent, currency, rates) VALUES (1, ?, ?, ?, ?, ?, ?)`,
-      [business.name, business.phone, business.address, business.gstPercent || 0, business.currency || '₹', JSON.stringify(business.rates || {})]
+      `INSERT INTO business (id, name, phone, address, gstPercent, currency, rates, adminUsername, adminPassword) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [business.name, business.phone, business.address, business.gstPercent || 0, business.currency || '₹', JSON.stringify(business.rates || {}), business.adminUsername || 'admin', business.adminPassword || 'admin']
     );
   }
 
@@ -123,7 +129,7 @@ async function migrateData(state) {
 
 async function createDefaultState() {
   await db.run(
-    `INSERT INTO business (id, name, phone, address, gstPercent, currency, rates) VALUES (1, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO business (id, name, phone, address, gstPercent, currency, rates, adminUsername, adminPassword) VALUES (1, ?, ?, ?, ?, ?, ?, 'admin', 'admin')`,
     ['Royal Snooker Club', '', '', 0, '₹', JSON.stringify({ 1: 300, 2: 300, 3: 200, 4: 200 })]
   );
 

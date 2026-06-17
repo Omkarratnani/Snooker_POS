@@ -60,10 +60,10 @@ app.get('/api/state', async (req, res) => {
 app.put('/api/business', async (req, res) => {
   try {
     const db = getDb();
-    const { name, phone, address, gstPercent, currency, rates } = req.body;
+    const { name, phone, address, gstPercent, currency, rates, adminUsername, adminPassword } = req.body;
     await db.run(
-      'UPDATE business SET name=?, phone=?, address=?, gstPercent=?, currency=?, rates=? WHERE id=1',
-      [name, phone, address, gstPercent, currency, JSON.stringify(rates)]
+      'UPDATE business SET name=?, phone=?, address=?, gstPercent=?, currency=?, rates=?, adminUsername=?, adminPassword=? WHERE id=1',
+      [name, phone, address, gstPercent, currency, JSON.stringify(rates), adminUsername || 'admin', adminPassword || 'admin']
     );
     res.json({ success: true });
   } catch (err) {
@@ -157,6 +157,44 @@ app.post('/api/bills', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to save bill:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Add Table
+app.post('/api/tables', async (req, res) => {
+  try {
+    const db = getDb();
+    const { id, name, type } = req.body;
+    await db.run(
+      'INSERT INTO tables (id, name, type, status, customerName, activeMatch, items, matches) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, name, type, 'free', '', 'null', '[]', '[]']
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete Table
+app.delete('/api/tables/:id', async (req, res) => {
+  try {
+    const db = getDb();
+    await db.run('DELETE FROM tables WHERE id=?', [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Factory Reset
+app.post('/api/reset', async (req, res) => {
+  try {
+    const db = getDb();
+    await db.run('DELETE FROM bills');
+    await db.run('UPDATE tables SET status=?, customerName=?, activeMatch=?, items=?, matches=?', ['free', '', 'null', '[]', '[]']);
+    res.json({ success: true });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

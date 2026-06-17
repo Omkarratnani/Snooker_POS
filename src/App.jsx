@@ -90,6 +90,13 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [matchForm, setMatchForm] = useState({ matchName: "", player1: "", player2: "", extraPlayers: "", winner: "", loser: "", payer: "", notes: "" });
   const [endingMatchTableId, setEndingMatchTableId] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginUser, setLoginUser] = useState("");
+  const [loginPass, setLoginPass] = useState("");
+  const [newTableName, setNewTableName] = useState("");
+  const [newTableType, setNewTableType] = useState("Snooker");
+  const [newTableRate, setNewTableRate] = useState(300);
+
 
   // New features state
   const [discountType, setDiscountType] = useState("Amount");
@@ -138,6 +145,33 @@ export default function App() {
   const runningTables = app.tables.filter((t) => t.status === "running").length;
 
   const filteredMenu = app.menu.filter((item) => `${item.name} ${item.category}`.toLowerCase().includes(search.toLowerCase()));
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50 p-4 font-sans text-slate-900">
+        <Card className="w-full max-w-sm rounded-3xl shadow-xl border-slate-200/60 bg-white/80 backdrop-blur-xl">
+          <CardHeader className="text-center pb-2">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg">
+              <Users className="h-8 w-8" />
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight">Snooker POS</CardTitle>
+            <p className="text-sm text-slate-500">Sign in to your account</p>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Username</Label>
+              <Input className="h-11 rounded-xl bg-slate-50/50" value={loginUser} onChange={(e) => setLoginUser(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Password</Label>
+              <Input type="password" className="h-11 rounded-xl bg-slate-50/50" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin()} />
+            </div>
+            <Button className="w-full h-11 rounded-xl text-base font-medium shadow-md transition-all hover:shadow-lg" onClick={handleLogin}>Sign In</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   async function updateTableAPI(tableId, patcher) {
     let updatedTable;
@@ -315,6 +349,49 @@ export default function App() {
       }).catch(console.error);
       return { ...prev, business: nextBusiness };
     });
+  }
+
+  async function handleFactoryReset() {
+    if (window.confirm("WARNING: This will delete ALL past bills and reset all active tables. This action CANNOT be undone!")) {
+      const confirmation = window.prompt("Type 'RESET' to confirm factory reset:");
+      if (confirmation === "RESET") {
+        await fetch('http://localhost:5001/api/reset', { method: 'POST' });
+        window.location.reload();
+      }
+    }
+  }
+
+  async function handleAddTable() {
+    if (!newTableName) return;
+    const newId = Math.max(0, ...app.tables.map(t => t.id)) + 1;
+    const newTable = { id: newId, name: newTableName, type: newTableType };
+    await fetch('http://localhost:5001/api/tables', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newTable)
+    });
+    await updateBusinessRate(newId, Number(newTableRate));
+    setNewTableName("");
+    const res = await fetch('http://localhost:5001/api/state');
+    const data = await res.json();
+    setApp(data);
+  }
+
+  async function handleDeleteTable(id) {
+    if (window.confirm("Delete this table?")) {
+      await fetch(`http://localhost:5001/api/tables/${id}`, { method: 'DELETE' });
+      const res = await fetch('http://localhost:5001/api/state');
+      const data = await res.json();
+      setApp(data);
+      if (selectedTableId === id) setSelectedTableId(1);
+    }
+  }
+
+  function handleLogin() {
+    if ((loginUser === 'admin' && loginPass === 'admin') || 
+        (loginUser === (app.business.adminUsername || 'admin') && loginPass === (app.business.adminPassword || 'admin'))) {
+      setIsAuthenticated(true);
+    } else {
+      alert("Invalid credentials");
+    }
   }
 
   async function updateBusinessRate(tableId, value) {
@@ -909,26 +986,75 @@ export default function App() {
             </Card>
           </TabsContent>
           
-          <TabsContent value="settings">
-            <Card className="rounded-2xl shadow-sm">
-              <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Business Settings</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2"><Label>Business name</Label><Input className="rounded-2xl" value={app.business.name} onChange={(e) => updateBusiness("name", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Phone</Label><Input className="rounded-2xl" value={app.business.phone} onChange={(e) => updateBusiness("phone", e.target.value)} /></div>
-                  <div className="space-y-2 md:col-span-2"><Label>Address</Label><Input className="rounded-2xl" value={app.business.address} onChange={(e) => updateBusiness("address", e.target.value)} /></div>
-                  <div className="space-y-2"><Label>Snooker 1 rate (/hr)</Label><Input className="rounded-2xl" type="number" value={app.business.rates?.[1] ?? 300} onChange={(e) => updateBusinessRate(1, Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Snooker 2 rate (/hr)</Label><Input className="rounded-2xl" type="number" value={app.business.rates?.[2] ?? 300} onChange={(e) => updateBusinessRate(2, Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Pool 1 rate (/hr)</Label><Input className="rounded-2xl" type="number" value={app.business.rates?.[3] ?? 200} onChange={(e) => updateBusinessRate(3, Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Pool 2 rate (/hr)</Label><Input className="rounded-2xl" type="number" value={app.business.rates?.[4] ?? 200} onChange={(e) => updateBusinessRate(4, Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>GST percent</Label><Input className="rounded-2xl" type="number" value={app.business.gstPercent} onChange={(e) => updateBusiness("gstPercent", Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Currency symbol</Label><Input className="rounded-2xl" value={app.business.currency} onChange={(e) => updateBusiness("currency", e.target.value)} /></div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
+          <TabsContent value="settings" className="space-y-6">
+              <Card className="rounded-2xl shadow-sm">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" /> Business Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2"><Label>Business name</Label><Input className="rounded-2xl" value={app.business.name} onChange={(e) => updateBusiness("name", e.target.value)} /></div>
+                    <div className="space-y-2"><Label>Phone</Label><Input className="rounded-2xl" value={app.business.phone} onChange={(e) => updateBusiness("phone", e.target.value)} /></div>
+                    <div className="space-y-2 md:col-span-2"><Label>Address</Label><Input className="rounded-2xl" value={app.business.address} onChange={(e) => updateBusiness("address", e.target.value)} /></div>
+                    <div className="space-y-2"><Label>GST percent</Label><Input className="rounded-2xl" type="number" value={app.business.gstPercent} onChange={(e) => updateBusiness("gstPercent", Number(e.target.value))} /></div>
+                    <div className="space-y-2"><Label>Currency symbol</Label><Input className="rounded-2xl" value={app.business.currency} onChange={(e) => updateBusiness("currency", e.target.value)} /></div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Admin Authentication</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2"><Label>Admin Username</Label><Input className="rounded-2xl" value={app.business.adminUsername || ''} onChange={(e) => updateBusiness("adminUsername", e.target.value)} /></div>
+                    <div className="space-y-2"><Label>Admin Password</Label><Input className="rounded-2xl" value={app.business.adminPassword || ''} onChange={(e) => updateBusiness("adminPassword", e.target.value)} /></div>
+                  </div>
+                  <p className="text-xs text-slate-500">Note: The master password (admin / admin) will always work as a fallback.</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Plus className="h-5 w-5" /> Table Management</CardTitle></CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    {app.tables.map(t => (
+                      <div key={t.id} className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border">
+                        <div className="flex-1 font-medium">{t.name} <span className="text-xs text-slate-500 font-normal ml-2 bg-slate-200 px-2 py-0.5 rounded-md">{t.type}</span></div>
+                        <div className="w-32 flex items-center gap-2">
+                          <Label className="whitespace-nowrap">Rate/hr:</Label>
+                          <Input className="h-8 rounded-lg" type="number" value={app.business.rates?.[t.id] ?? 300} onChange={(e) => updateBusinessRate(t.id, Number(e.target.value))} />
+                        </div>
+                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleDeleteTable(t.id)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <Label className="mb-2 block">Add New Table</Label>
+                    <div className="flex gap-3 items-end">
+                      <div className="space-y-1 flex-1"><Label className="text-xs text-slate-500">Name</Label><Input className="h-9 rounded-xl" placeholder="e.g. Snooker 3" value={newTableName} onChange={e => setNewTableName(e.target.value)} /></div>
+                      <div className="space-y-1 w-32"><Label className="text-xs text-slate-500">Type</Label>
+                        <select className="flex h-9 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors" value={newTableType} onChange={e => setNewTableType(e.target.value)}>
+                          <option value="Snooker">Snooker</option>
+                          <option value="Pool">Pool</option>
+                          <option value="Billiards">Billiards</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1 w-24"><Label className="text-xs text-slate-500">Rate/hr</Label><Input type="number" className="h-9 rounded-xl" value={newTableRate} onChange={e => setNewTableRate(e.target.value)} /></div>
+                      <Button className="h-9 rounded-xl" onClick={handleAddTable}>Add</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm border-red-200 bg-red-50/50">
+                <CardHeader><CardTitle className="flex items-center gap-2 text-red-600"><Trash2 className="h-5 w-5" /> Danger Zone</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-sm text-red-600/80 mb-4">Resetting the system will permanently delete all past bills and terminate any currently active matches. This action cannot be undone.</p>
+                  <Button variant="destructive" className="rounded-xl shadow-sm" onClick={handleFactoryReset}>Factory Reset Data</Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
 
       {endingMatchTableId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
