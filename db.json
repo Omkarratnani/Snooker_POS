@@ -1,0 +1,221 @@
+{
+  "business": {
+    "name": "Snooker Club",
+    "phone": "",
+    "address": "",
+    "rates": {
+      "1": 360,
+      "2": 300,
+      "3": 240,
+      "4": 180
+    },
+    "currency": "₹",
+    "gstPercent": 0,
+    "tableRatePerHour": 300,
+    "snookerRatePerHour": 300,
+    "poolRatePerHour": 200
+  },
+  "tables": [
+    {
+      "id": 1,
+      "name": "Snooker 1",
+      "type": "Snooker",
+      "status": "running",
+      "activeMatch": {
+        "startTime": 1780648962467,
+        "manualSeconds": 0
+      },
+      "matches": [],
+      "items": [],
+      "customerName": "",
+      "startTime": null,
+      "manualSeconds": 0
+    },
+    {
+      "id": 2,
+      "name": "Snooker 2",
+      "type": "Snooker",
+      "status": "free",
+      "activeMatch": null,
+      "matches": [],
+      "items": [],
+      "customerName": ""
+    },
+    {
+      "id": 3,
+      "name": "Pool 1",
+      "type": "Pool",
+      "status": "free",
+      "activeMatch": null,
+      "matches": [],
+      "items": [],
+      "customerName": ""
+    },
+    {
+      "id": 4,
+      "name": "Pool 2",
+      "type": "Pool",
+      "status": "free",
+      "activeMatch": null,
+      "matches": [],
+      "items": [],
+      "customerName": ""
+    }
+  ],
+  "menu": [
+    {
+      "id": 1,
+      "name": "Water Bottle",
+      "price": 20,
+      "category": "Drinks",
+      "stock": 100
+    },
+    {
+      "id": 2,
+      "name": "Cold Drink",
+      "price": 40,
+      "category": "Drinks",
+      "stock": 49
+    },
+    {
+      "id": 3,
+      "name": "Tea",
+      "price": 20,
+      "category": "Drinks",
+      "stock": 999
+    },
+    {
+      "id": 4,
+      "name": "Coffee",
+      "price": 40,
+      "category": "Drinks",
+      "stock": 999
+    },
+    {
+      "id": 5,
+      "name": "Maggi",
+      "price": 60,
+      "category": "Food",
+      "stock": 40
+    },
+    {
+      "id": 6,
+      "name": "Sandwich",
+      "price": 80,
+      "category": "Food",
+      "stock": 30
+    },
+    {
+      "id": 7,
+      "name": "Chips",
+      "price": 30,
+      "category": "Snacks",
+      "stock": 80
+    },
+    {
+      "id": 8,
+      "name": "Cue Tip",
+      "price": 50,
+      "category": "Extras",
+      "stock": 25
+    },
+    {
+      "id": 1780381894621,
+      "name": "colddrink",
+      "price": 20,
+      "category": "Drink",
+      "stock": 20
+    }
+  ],
+  "bills": [
+    {
+      "id": "BILL-1780648900743",
+      "date": "5/6/2026, 2:11:40 pm",
+      "day": "5/6/2026",
+      "tableId": 1,
+      "table": "Snooker 1",
+      "customerName": "Walk-in Customer",
+      "paymentMode": "UPI",
+      "seconds": 3,
+      "tableAmount": 0.30000000000000004,
+      "itemAmount": 40,
+      "subtotal": 40.3,
+      "gst": 0,
+      "total": 40.3,
+      "items": [
+        {
+          "id": 2,
+          "name": "Cold Drink",
+          "price": 40,
+          "category": "Drinks",
+          "stock": 50,
+          "qty": 1
+        }
+      ]
+    },
+    {
+      "id": "BILL-1780381983764",
+      "date": "2/6/2026, 12:03:03 pm",
+      "day": "2/6/2026",
+      "tableId": 1,
+      "table": "Snooker 1",
+      "customerName": "Walk-in Customer",
+      "paymentMode": "UPI",
+      "seconds": 2,
+      "tableAmount": 0.2,
+      "itemAmount": 0,
+      "subtotal": 0.2,
+      "gst": 0,
+      "total": 0.2,
+      "items": []
+    },
+    {
+      "id": "BILL-1780381734714",
+      "date": "2/6/2026, 11:58:54 am",
+      "day": "2/6/2026",
+      "tableId": 1,
+      "table": "Snooker 1",
+      "customerName": "Walk-in Customer",
+      "paymentMode": "UPI",
+      "seconds": 73,
+      "tableAmount": 8.11111111111111,
+      "itemAmount": 0,
+      "subtotal": 8.11111111111111,
+      "gst": 0,
+      "total": 8.11111111111111,
+      "items": []
+    },
+    {
+      "id": "BILL-1780381709169",
+      "date": "2/6/2026, 11:58:29 am",
+      "day": "2/6/2026",
+      "tableId": 3,
+      "table": "Pool 1",
+      "customerName": "Walk-in Customer",
+      "paymentMode": "UPI",
+      "seconds": 37,
+      "tableAmount": 3.0833333333333335,
+      "itemAmount": 0,
+      "subtotal": 3.0833333333333335,
+      "gst": 0,
+      "total": 3.0833333333333335,
+      "items": []
+    },
+    {
+      "id": "BILL-1780381704749",
+      "date": "2/6/2026, 11:58:24 am",
+      "day": "2/6/2026",
+      "tableId": 3,
+      "table": "Pool 1",
+      "customerName": "Walk-in Customer",
+      "paymentMode": "UPI",
+      "seconds": 37,
+      "tableAmount": 3.0833333333333335,
+      "itemAmount": 0,
+      "subtotal": 3.0833333333333335,
+      "gst": 0,
+      "total": 3.0833333333333335,
+      "items": []
+    }
+  ]
+}

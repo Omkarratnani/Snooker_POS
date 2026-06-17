@@ -1,0 +1,8 @@
+node_modules/
+dist/
+release/
+database.sqlite
+database.sqlite-journal
+SnookerPOS_Backup.zip
+SnookerPOS_Full.zip
+.env
